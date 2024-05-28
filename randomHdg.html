@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>随机航向测试</title>
+</head>
+
+<body onload="getRandomHdg()">
+    <h1 style="text-align: center;">随机航向判别测试</h1>
+    <button onclick="getRandomHdg()">随机生成</button>
+    <br />
+    <canvas id="canvas" height="100" width="100" style="margin: 1em"></canvas>
+    <br />
+    <input type="number" id="inputHdg" />
+    <button id="submit" onclick="onSubmit()">显示答案</button>
+    <p id="realHdg"></p>
+    <p id="result"></p>
+</body>
+
+<script type="text/javascript">
+    var randomHDG;
+    var threshold = 10;
+
+    function getRandomHdg() {
+        randomHDG = Math.floor(Math.random() * 360);
+        if (randomHDG < 0) randomHDG += 360;
+        var r = 50;
+        var centerX = r;
+        var centerY = r;
+        var centerRecR = 5;
+        var hdgX = centerX + r * Math.cos(((randomHDG - 90) * Math.PI) / 180);
+        var hdgY = centerY + r * Math.sin(((randomHDG - 90) * Math.PI) / 180);
+
+        var showRealPara = document.getElementById("realHdg");
+        showRealPara.innerText = "";
+        var showResultPara = document.getElementById("result");
+        showResultPara.innerText = "";
+        document.getElementById("inputHdg").value = "";
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, r * 2, r * 2);
+        ctx.beginPath();
+        ctx.moveTo(hdgX, hdgY);
+        ctx.lineTo(centerX, centerY);
+        ctx.stroke();
+        ctx.translate(centerX, centerY);
+        ctx.rotate((randomHDG * Math.PI) / 180);
+        ctx.strokeRect(-centerRecR, -centerRecR, centerRecR * 2, centerRecR * 2);
+        ctx.rotate((-randomHDG * Math.PI) / 180);
+        ctx.translate(-centerX, -centerY);
+    }
+
+    function onSubmit() {
+        var result = document.getElementById("inputHdg").value;
+        var showRealPara = document.getElementById("realHdg");
+        showRealPara.innerText = "实际角度为：" + randomHDG + "°";
+
+        var showResultPara = document.getElementById("result");
+
+        var cha = Math.abs(result - randomHDG);
+        if (cha > 180) {
+            cha = 360 - cha;
+        }
+        if (cha <= 10) {
+            showResultPara.innerText = "误差小于" + threshold + "°，正确";
+            showResultPara.style.color = "green";
+        } else {
+            showResultPara.innerText = "误差大于" + threshold + "°，错误";
+            showResultPara.style.color = "red";
+        }
+    }
+
+    var inputHdg = document.getElementById("inputHdg");
+    inputHdg.addEventListener("keyup", (event) => {
+        event.preventDefault();
+        if (event.keyCode == 13) {
+            document.getElementById("submit").click();
+        }
+    });
+</script>
+
+</html>
